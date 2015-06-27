@@ -36,11 +36,9 @@ import us.physion.ovation.ui.interfaces.ConnectionProvider;
 })
 public class EntityChildrenChildFactory extends ChildFactory<EntityWrapper> {
     private final EntityWrapper parent;
-    protected final TreeFilter filter;
 
-    public EntityChildrenChildFactory(EntityWrapper parent, TreeFilter filter) {
+    public EntityChildrenChildFactory(EntityWrapper parent) {
         this.parent = parent;
-        this.filter = filter;
     }
     
     public void refresh() {
@@ -59,7 +57,7 @@ public class EntityChildrenChildFactory extends ChildFactory<EntityWrapper> {
                 }
             };
         }
-        return EntityWrapperUtilities.createNode(key, new EntityChildrenChildFactory(key, filter));
+        return EntityWrapperUtilities.createNode(key, new EntityChildrenChildFactory(key));
     }
     
     @Override
@@ -107,7 +105,7 @@ public class EntityChildrenChildFactory extends ChildFactory<EntityWrapper> {
         HeavyLoadManager.getDefault().startLoading(parent);
 
         try {
-            createEntityChildrenWrapperHelper(filter, cancel).createKeysForEntity(toPopulate, c, parent, ph);
+            createEntityChildrenWrapperHelper(cancel).createKeysForEntity(toPopulate, c, parent, ph);
 
             //XXX: Technically here we only need to sort the newly added elements since the previous call but it's too finicky and I'm not certain it's such a performance bottleneck
             Collections.sort(toPopulate, new EntityComparator());
@@ -124,8 +122,8 @@ public class EntityChildrenChildFactory extends ChildFactory<EntityWrapper> {
         return Bundle.Loading_Entity_Children(parent.getDisplayName());
     }
     
-    protected EntityChildrenWrapperHelper createEntityChildrenWrapperHelper(TreeFilter filter,  BusyCancellable cancel) {
-        return new EntityChildrenWrapperHelper(filter, cancel);
+    protected EntityChildrenWrapperHelper createEntityChildrenWrapperHelper(BusyCancellable cancel) {
+        return new EntityChildrenWrapperHelper(cancel);
     }
 
     private final AtomicBoolean loaded = new AtomicBoolean();

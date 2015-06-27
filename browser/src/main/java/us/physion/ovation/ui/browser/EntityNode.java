@@ -199,11 +199,6 @@ public class EntityNode extends AbstractNode implements RefreshableNode, URINode
         return uri;
     }
 
-    @Override
-    public List<URI> getFilteredParentURIs() {
-        return entityWrapper == null ? Collections.EMPTY_LIST : entityWrapper.getFilteredParentURIs();
-    }
-
     private List<URI> buildURITreePath() {
         List<URI> paths = new ArrayList<>();
 
@@ -212,8 +207,6 @@ public class EntityNode extends AbstractNode implements RefreshableNode, URINode
             if (n instanceof URINode) {
                 //put in reverse
                 paths.add(((URINode) n).getURI());
-
-                paths.addAll(((URINode) n).getFilteredParentURIs());
             }
             n = n.getParentNode();
         }

@@ -22,18 +22,18 @@ public class FilteredEntityChildrenChildFactory extends EntityChildrenChildFacto
 
     private final Iterable<Class> classesToInclude;
 
-    public FilteredEntityChildrenChildFactory(EntityWrapper parent, TreeFilter filter, Iterable<Class> classesToInclude) {
-        super(parent, filter);
+    public FilteredEntityChildrenChildFactory(EntityWrapper parent, Iterable<Class> classesToInclude) {
+        super(parent);
         this.classesToInclude = classesToInclude;
     }
 
     @Override
     protected Node createNodeForKey(EntityWrapper key) {
-        return EntityWrapperUtilities.createNode(key, new FilteredEntityChildrenChildFactory(key, filter, classesToInclude));
+        return EntityWrapperUtilities.createNode(key, new FilteredEntityChildrenChildFactory(key, classesToInclude));
     }
 
     @Override
-    protected EntityChildrenWrapperHelper createEntityChildrenWrapperHelper(TreeFilter filter, BusyCancellable cancel) {
-        return new FilteredEntityChildrenWrapperHelper(filter, classesToInclude, cancel);
+    protected EntityChildrenWrapperHelper createEntityChildrenWrapperHelper(BusyCancellable cancel) {
+        return new FilteredEntityChildrenWrapperHelper(classesToInclude, cancel);
     }
 }

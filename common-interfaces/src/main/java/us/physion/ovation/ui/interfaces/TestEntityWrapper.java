@@ -51,11 +51,6 @@ public class TestEntityWrapper implements IEntityWrapper{
         return uri;
     }
 
-    @Override
-    public List<URI> getFilteredParentURIs() {
-        return Collections.EMPTY_LIST;
-    }
-
     //TODO: call this on some static method in our iterfaces jar
     protected String inferDisplayName(OvationEntity e)
     {

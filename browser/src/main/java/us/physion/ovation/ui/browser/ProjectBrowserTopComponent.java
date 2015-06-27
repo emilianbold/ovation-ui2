@@ -4,8 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.util.prefs.Preferences;
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -22,7 +20,6 @@ import org.openide.util.NbBundle.Messages;
 import org.openide.util.NbPreferences;
 import org.openide.windows.TopComponent;
 import us.physion.ovation.domain.Project;
-import us.physion.ovation.ui.browser.TreeFilter.NavigatorType;
 import us.physion.ovation.ui.interfaces.ConnectionListener;
 import us.physion.ovation.ui.interfaces.ConnectionProvider;
 import us.physion.ovation.ui.interfaces.EntityColors;
@@ -55,39 +52,15 @@ public final class ProjectBrowserTopComponent extends TopComponent implements Ex
     private Lookup lookup;
     private final ExplorerManager explorerManager = new ExplorerManager();
     private final BeanTreeView view;
-    private final TreeFilter filter;
     private final FilteredTreeViewPanel treeViewPanel;
 
     private static final String SHOW_FIRST_RUN_TIP = "show_first_run_tip";
 
     public ProjectBrowserTopComponent() {
-
-        filter = new TreeFilter(NavigatorType.PROJECT);
-
         final Preferences prefs = NbPreferences.forModule(ProjectBrowserTopComponent.class);
 
-        filter.setExperimentsVisible(prefs.getBoolean("experiments-visible", true));
-        filter.setEpochGroupsVisible(prefs.getBoolean("epoch-groups-visible", true));
-        filter.setEpochsVisible(prefs.getBoolean("epochs-visible", true));
-
-        filter.addPropertyChangeListener((PropertyChangeEvent evt) -> {
-            boolean newValue = (Boolean) evt.getNewValue();
-            
-            if (evt.getPropertyName().equals("experimentsVisible")) {
-                prefs.putBoolean("experiments-visible", newValue);
-            }
-            
-            if (evt.getPropertyName().equals("epochGroupsVisible")) {
-                prefs.putBoolean("epoch-groups-visible", newValue);
-            }
-            
-            if(evt.getPropertyName().equals("epochsVisible")) {
-                prefs.putBoolean("epochs-visible", newValue);
-            }
-        });
-
         setLayout(new BorderLayout());
-        treeViewPanel = new FilteredTreeViewPanel(filter,
+        treeViewPanel = new FilteredTreeViewPanel(
                 "us.physion.ovation.ui.browser.insertion.NewProjectAction",
                 Bundle.HINT_ProjectBrowser_NewProject_Button());
 
@@ -100,13 +73,7 @@ public final class ProjectBrowserTopComponent extends TopComponent implements Ex
 
         lookup = ExplorerUtils.createLookup(explorerManager, getActionMap());
         associateLookup(lookup);
-        BrowserUtilities.initBrowser(explorerManager, filter);
-        filter.addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                BrowserUtilities.resetView(explorerManager, filter);
-            }
-        });
+        BrowserUtilities.initBrowser(explorerManager, NavigatorType.PROJECT);
 
         ActionMap actionMap = this.getActionMap();
         actionMap.put("copy-to-clipboard", (Action) new BrowserCopyAction());

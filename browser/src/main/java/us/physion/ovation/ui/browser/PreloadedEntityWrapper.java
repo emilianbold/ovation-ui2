@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package us.physion.ovation.ui.browser;
 
 import com.google.common.collect.Lists;
@@ -22,7 +18,7 @@ public class PreloadedEntityWrapper extends EntityWrapper{
     }
     private final List<EntityWrapper> children;
 
-    public void addChildren(TreeFilter filter, List<OvationEntity> entityChain, OvationEntity last)
+    public void addChildren(List<OvationEntity> entityChain, OvationEntity last)
     {
         PreloadedEntityWrapper current = this;
         for (OvationEntity entity : entityChain)

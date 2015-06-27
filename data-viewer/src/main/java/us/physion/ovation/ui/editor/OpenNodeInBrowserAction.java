@@ -3,7 +3,6 @@ package us.physion.ovation.ui.editor;
 import java.awt.event.ActionEvent;
 import java.beans.PropertyVetoException;
 import java.net.URI;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -95,13 +94,7 @@ public class OpenNodeInBrowserAction extends AbstractAction {
             @Override
             protected List<URI> getTreeSubPath(Node n) {
                 if (n instanceof URINode) {
-                    //XXX: Also see EntityNode.buildURITreePath
-
-                    List<URI> paths = new ArrayList<>(((URINode) n).getFilteredParentURIs());
-                    Collections.reverse(paths);
-
-                    paths.add(((URINode) n).getURI());
-                    return paths;
+                    return Collections.singletonList(((URINode) n).getURI());
                 } else {
                     log.warn("Cannot find subpath for non-URINode " + n);
                     return Collections.EMPTY_LIST;

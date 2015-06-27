@@ -20,9 +20,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -50,41 +47,10 @@ import us.physion.ovation.domain.mixin.ProcedureElement;
 
 public class EntityChildrenWrapperHelper {
 
-    private final TreeFilter filter;
     private final BusyCancellable cancel;
 
-    public EntityChildrenWrapperHelper(TreeFilter filter, BusyCancellable cancel) {
-        this.filter = filter;
+    public EntityChildrenWrapperHelper(BusyCancellable cancel) {
         this.cancel = cancel;
-    }
-
-    private void absorbFilteredChildren(EntityWrapper pop, boolean isVisible, List<EntityWrapper> list, DataContext c, /* @Nullable*/ ProgressHandle ph, EntityComparator entityComparator) {
-        if (!isVisible) {
-            List<URI> filteredParents = new ArrayList<>();
-            filteredParents.addAll(pop.getFilteredParentURIs());
-            URI u = null;
-            try {
-                u = pop.getURI() == null ? null : new URI(pop.getURI());
-            } catch (URISyntaxException ex) {
-            }
-            filteredParents.add(u);
-
-            List<EntityWrapper> children;
-            if (pop instanceof PreloadedEntityWrapper) {
-                children = filterVisible(((PreloadedEntityWrapper) pop).getChildren(), ph);
-            } else {
-                children = createKeysForEntity(c, pop, ph);
-            }
-            for (EntityWrapper e : children) {
-                e.addFilteredParentURIs(filteredParents);
-            }
-            //XXX: This is basically list.addAll(children). It seems list.addAll doesn't refresh the UI (bug in the org.openide.nodes.AsynchChildren LinkedList subclass?) but list.add() does.
-            for (EntityWrapper e : children) {
-                list.add(e);
-            }
-        } else {
-            list.add(pop);
-        }
     }
 
     protected List<EntityWrapper> createKeysForEntity(DataContext c, EntityWrapper ew) {
@@ -97,10 +63,7 @@ public class EntityChildrenWrapperHelper {
 
     public List<EntityWrapper> createKeysForEntity(List<EntityWrapper> list, DataContext c, EntityWrapper ew, /* @Nullable*/ ProgressHandle ph) {
         if (ew instanceof PreloadedEntityWrapper) {
-            EntityComparator entityComparator = new EntityComparator();
-            for (EntityWrapper child : ((PreloadedEntityWrapper) ew).getChildren()) {
-                absorbFilteredChildren(child, isVisible(child, filter), list, c, ph, entityComparator);
-            }
+            list.addAll(((PreloadedEntityWrapper) ew).getChildren());
             return list;
         }
 
@@ -117,27 +80,27 @@ public class EntityChildrenWrapperHelper {
                 addAnalysisRecords(list, entity, ph);
             } else if (Source.class.isAssignableFrom(entityClass)) {
                 Source entity = (Source) ew.getEntity();
-                addChildrenSources(list, entity, ph);
-                addProcedureElements(list, entity, ph);
-                addMeasuredRevisions(list, entity, ph);
+                addChildrenSources(list, entity);
+                addProcedureElements(list, entity);
+                addMeasuredRevisions(list, entity);
             } else if (Experiment.class.isAssignableFrom(entityClass)) {
                 Experiment entity = (Experiment) ew.getEntity();
-                addEpochGroups(list, entity, ph);
-                addEpochs(list, entity, ph);
+                addEpochGroups(list, entity);
+                addEpochs(list, entity);
             } else if (EpochGroup.class.isAssignableFrom(entityClass)) {
                 EpochGroup entity = (EpochGroup) ew.getEntity();
-                addEpochGroups(list, entity, ph);
+                addEpochGroups(list, entity);
                 addEpochs(list, entity, ph);
             } else if (Epoch.class.isAssignableFrom(entityClass)) {
                 Epoch entity = (Epoch) ew.getEntity();
-                addMeasurements(list, entity, ph);
+                addMeasurements(list, entity);
                 addAnalysisRecords(list, entity, ph);
             } else if (AnalysisRecord.class.isAssignableFrom(entityClass)) {
                 AnalysisRecord entity = (AnalysisRecord) ew.getEntity();
-                addOutputs(list, entity, ph);
+                addOutputs(list, entity);
             } else if (Protocol.class.isAssignableFrom(entityClass)) {
                 Protocol entity = ew.getEntity(Protocol.class);
-                addProcedureElements(list, entity, ph);
+                addProcedureElements(list, entity);
             } else if (Folder.class.isAssignableFrom(entityClass)) {
                 Folder f = ew.getEntity(Folder.class);
                 addContents(list, f, ph);
@@ -211,7 +174,7 @@ public class EntityChildrenWrapperHelper {
         return sortEpochList(epochs);
     }
 
-    private List<? extends EntityWrapper> getTopLevelProcedureElements(TreeFilter filter, Iterable<? extends ProcedureElement> procedures) {
+    private List<? extends EntityWrapper> getTopLevelProcedureElements(Iterable<? extends ProcedureElement> procedures) {
         HashMap<String, EntityWrapper> visibleProcedureElements = Maps.newHashMap();
         List<EntityWrapper> experiments = Lists.newLinkedList();
         for (ProcedureElement e : procedures) {
@@ -237,7 +200,7 @@ public class EntityChildrenWrapperHelper {
                 } else {
                     p = new PreloadedEntityWrapper(localParent);
                 }
-                p.addChildren(filter, epochGroupChain, e);
+                p.addChildren(epochGroupChain, e);
                 visibleProcedureElements.put(p.getURI(), p);
             } else { //Experiment
                 EntityWrapper p = new EntityWrapper(e);
@@ -270,7 +233,7 @@ public class EntityChildrenWrapperHelper {
         }
     }
 
-    private void addOutputs(List<EntityWrapper> list, AnalysisRecord entity, ProgressHandle ph) {
+    private void addOutputs(List<EntityWrapper> list, AnalysisRecord entity) {
         for (Revision d : entity.getOutputs().values()) {
             list.add(new EntityWrapper(d));
         }
@@ -309,7 +272,6 @@ public class EntityChildrenWrapperHelper {
             return;
         }
 
-        EntityComparator entityComparator = new EntityComparator();
         List<Experiment> experiments = sortedExperiments(entity);
 
         int progressCounter = 0;
@@ -321,7 +283,7 @@ public class EntityChildrenWrapperHelper {
             if (cancel.isCancelled()) {
                 return;
             }
-            absorbFilteredChildren(new EntityWrapper(e), filter.isExperimentsVisible(), list, entity.getDataContext(), ph, entityComparator);
+            list.add(new EntityWrapper(e));
 
             if (ph != null) {
                 ph.progress(progressCounter++);
@@ -329,35 +291,31 @@ public class EntityChildrenWrapperHelper {
         }
     }
 
-    private void addEpochGroups(List<EntityWrapper> list, Experiment entity, ProgressHandle ph) {
-        EntityComparator entityComparator = new EntityComparator();
+    private void addEpochGroups(List<EntityWrapper> list, Experiment entity) {
         for (EpochGroup eg : sortedEpochGroups(entity)) {
-            absorbFilteredChildren(new EntityWrapper(eg), filter.isEpochGroupsVisible(), list, entity.getDataContext(), ph, entityComparator);
+            list.add(new EntityWrapper(eg));
         }
     }
 
-    private void addEpochGroups(List<EntityWrapper> list, EpochGroup entity, ProgressHandle ph) {
-        EntityComparator entityComparator = new EntityComparator();
+    private void addEpochGroups(List<EntityWrapper> list, EpochGroup entity) {
         for (EpochGroup eg : entity.getEpochGroups()) {
-            absorbFilteredChildren(new EntityWrapper(eg), filter.isEpochGroupsVisible(), list, entity.getDataContext(), ph, entityComparator);
+            list.add(new EntityWrapper(eg));
         }
     }
 
-    private void addEpochs(List<EntityWrapper> list, Experiment entity, ProgressHandle ph) {
-        EntityComparator entityComparator = new EntityComparator();
+    private void addEpochs(List<EntityWrapper> list, Experiment entity) {
         for (Epoch e : sortedEpochs(entity)) {
-            absorbFilteredChildren(new EntityWrapper(e), filter.isEpochsVisible(), list, entity.getDataContext(), ph, entityComparator);
+            list.add(new EntityWrapper(e));
         }
     }
 
     private void addEpochs(List<EntityWrapper> list, EpochGroup entity, ProgressHandle ph) {
-        EntityComparator entityComparator = new EntityComparator();
         if (ph != null) {
             ph.progress(Bundle.Loading_Epochs());
         }
         try {
             for (Epoch e : sortedEpochs(entity)) {
-                absorbFilteredChildren(new EntityWrapper(e), filter.isEpochsVisible(), list, entity.getDataContext(), ph, entityComparator);
+                list.add(new EntityWrapper(e));
             }
         } finally {
             if (ph != null) {
@@ -366,23 +324,20 @@ public class EntityChildrenWrapperHelper {
         }
     }
 
-    private void addMeasurements(List<EntityWrapper> list, Epoch entity, ProgressHandle ph) {
+    private void addMeasurements(List<EntityWrapper> list, Epoch entity) {
         for (Measurement m : entity.getMeasurements()) {
             list.add(new EntityWrapper(m));
         }
     }
 
-    private void addChildrenSources(List<EntityWrapper> list, Source entity, ProgressHandle ph) {
+    private void addChildrenSources(List<EntityWrapper> list, Source entity) {
         for (Source e : entity.getChildren()) {
             list.add(new EntityWrapper(e));
         }
     }
 
-    private void addProcedureElements(List<EntityWrapper> list, Protocol entity, ProgressHandle ph) {
-        EntityComparator entityComparator = new EntityComparator();
-        //if Epoch's parents should be visible
-        if (filter.isExperimentsVisible() || filter.isEpochGroupsVisible()) {
-            List<? extends EntityWrapper> topLevelProcedureElements = getTopLevelProcedureElements(filter,
+    private void addProcedureElements(List<EntityWrapper> list, Protocol entity) {
+            List<? extends EntityWrapper> topLevelProcedureElements = getTopLevelProcedureElements(
                     Iterables.transform(entity.getProcedures(), new Function<OvationEntity, ProcedureElement>() {
 
                         @Override
@@ -391,35 +346,16 @@ public class EntityChildrenWrapperHelper {
                         }
                     }));
 
-            for (EntityWrapper exp : topLevelProcedureElements) {
-                absorbFilteredChildren(exp, filter.isExperimentsVisible(), list, entity.getDataContext(), ph, entityComparator);
-            }
-        } else {
-            for (Epoch e : sortedEpochs(entity)) {
-                absorbFilteredChildren(new EntityWrapper(e), filter.isEpochsVisible(), list, entity.getDataContext(), ph, entityComparator);
-            }
-
-        }
-
+            list.addAll(topLevelProcedureElements);
     }
 
-    private void addProcedureElements(List<EntityWrapper> list, Source entity, ProgressHandle ph) {
-        EntityComparator entityComparator = new EntityComparator();
-        //if Epoch's parents should be visible
-        if (filter.isExperimentsVisible() || filter.isEpochGroupsVisible()) {
-            List<? extends EntityWrapper> topLevelProcedureElements = getTopLevelProcedureElements(filter, entity.getEpochs());
+    private void addProcedureElements(List<EntityWrapper> list, Source entity) {
+            List<? extends EntityWrapper> topLevelProcedureElements = getTopLevelProcedureElements(entity.getEpochs());
 
-            for (EntityWrapper exp : topLevelProcedureElements) {
-                absorbFilteredChildren(exp, filter.isExperimentsVisible(), list, entity.getDataContext(), ph, entityComparator);
-            }
-        } else {
-            for (Epoch e : sortedEpochs(entity)) {
-                absorbFilteredChildren(new EntityWrapper(e), filter.isEpochsVisible(), list, entity.getDataContext(), ph, entityComparator);
-            }
-        }
+            list.addAll(topLevelProcedureElements);
     }
     
-    private void addMeasuredRevisions(List<EntityWrapper> list, Source source, ProgressHandle ph) {
+    private void addMeasuredRevisions(List<EntityWrapper> list, Source source) {
         EntityComparator entityComparator = new EntityComparator();
         List<EntityWrapper> revWrappers = Lists.newArrayList();
         for(Revision rev : source.getMeasuredRevisions()) {
@@ -431,34 +367,6 @@ public class EntityChildrenWrapperHelper {
         
         revWrappers.sort(entityComparator);
         list.addAll(revWrappers);
-    }
-
-    private List<EntityWrapper> filterVisible(List<EntityWrapper> children, ProgressHandle ph) {
-        List<EntityWrapper> visible = new LinkedList();
-        for (EntityWrapper child : children) {
-            if (isVisible(child, filter)) {
-                visible.add(child);
-            } else {
-                if (child instanceof PreloadedEntityWrapper) {
-                    visible.addAll(filterVisible(((PreloadedEntityWrapper) child).getChildren(), ph));
-                } else {
-                    visible.addAll(createKeysForEntity(child.getEntity().getDataContext(), child, ph));
-                }
-            }
-        }
-        return visible;
-    }
-
-    private boolean isVisible(EntityWrapper ew, TreeFilter filter) {
-        Class entityClass = ew.getType();
-        if (Experiment.class.isAssignableFrom(entityClass) && !filter.isExperimentsVisible()) {
-            return false;
-        } else if (EpochGroup.class.isAssignableFrom(entityClass) && !filter.isEpochGroupsVisible()) {
-            return false;
-        } else if (Epoch.class.isAssignableFrom(entityClass) && !filter.isEpochsVisible()) {
-            return false;
-        }
-        return true;
     }
 
     private void addContents(List<EntityWrapper> list, Folder entity, ProgressHandle ph) {
@@ -498,7 +406,6 @@ public class EntityChildrenWrapperHelper {
             return;
         }
 
-        EntityComparator entityComparator = new EntityComparator();
         List<Revision> revs = Lists.newArrayList(r.getRevisions());
 
         int progressCounter = 0;

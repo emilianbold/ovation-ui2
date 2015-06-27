@@ -7,9 +7,6 @@ import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import us.physion.ovation.domain.Epoch;
-import us.physion.ovation.domain.EpochGroup;
-import us.physion.ovation.domain.Experiment;
 import us.physion.ovation.domain.Project;
 import us.physion.ovation.domain.Protocol;
 import us.physion.ovation.domain.Source;
@@ -22,15 +19,15 @@ import us.physion.ovation.ui.interfaces.IEntityWrapper;
 public final class QueryChildren extends Children.Keys<IEntityWrapper> {
 
     private final Set<IEntityWrapper> keys = Sets.newHashSet();
-    private final TreeFilter filter;
+    private final NavigatorType navigatorType;
     private final java.util.Map<String,QueryChildren> children = Maps.newHashMap();
 
-    protected QueryChildren(TreeFilter filter) {
-        this.filter = filter;
+    protected QueryChildren(NavigatorType navigatorType) {
+        this.navigatorType = navigatorType;
     }
 
-    protected QueryChildren(Set<List<IEntityWrapper>> paths, TreeFilter filter) {
-        this(filter);
+    protected QueryChildren(Set<List<IEntityWrapper>> paths, NavigatorType navigatorType) {
+        this(navigatorType);
 
         if (paths == null) {
             return;
@@ -53,7 +50,7 @@ public final class QueryChildren extends Children.Keys<IEntityWrapper> {
             logger.debug("Creating leaf node for " + key.getEntity().getClass().getSimpleName() + "(" + key.getURI() + ")");
 
             return new Node[]{
-                EntityWrapperUtilities.createNewNode(key, new EntityChildrenChildFactory((EntityWrapper) key, filter))
+                EntityWrapperUtilities.createNewNode(key, new EntityChildrenChildFactory((EntityWrapper) key))
             };
         }        
     }
@@ -70,7 +67,7 @@ public final class QueryChildren extends Children.Keys<IEntityWrapper> {
 
     protected boolean shouldAdd(IEntityWrapper e) {
 
-        switch (filter.getNavigatorType()) {
+        switch (navigatorType) {
             case PROJECT:
                 if (Source.class.isAssignableFrom(e.getType())
                         || Protocol.class.isAssignableFrom(e.getType())) {
@@ -114,16 +111,9 @@ public final class QueryChildren extends Children.Keys<IEntityWrapper> {
         if (shouldAdd(root)) {// projects don't belong in source view, and vice versa
 
             List<IEntityWrapper> childPath = path.subList(0, path.size() - 1);
-            if (hide(root)) {
-                //TODO: instead of just adding the hidden entity's children to the children set,
-                //we should be creating some sort of intermediate hidden node, or some representation
-                //of the hidden element in the child key
-                addPath(childPath);
-            } else {
-                
                 if (!childPath.isEmpty()) {
                     if(!children.containsKey(root.getURI())) {
-                        children.put(root.getURI(), new QueryChildren(filter));
+                        children.put(root.getURI(), new QueryChildren(navigatorType));
                     }
                     
                     Collection<List<IEntityWrapper>> childPaths = Sets.newHashSet();
@@ -132,18 +122,7 @@ public final class QueryChildren extends Children.Keys<IEntityWrapper> {
                 }
 
                 keys.add(root);
-            }
         }
     }
 
-    private boolean hide(IEntityWrapper child) {
-        if (Experiment.class.isAssignableFrom(child.getType()) && !filter.isExperimentsVisible()) {
-            return true;
-        } else if (EpochGroup.class.isAssignableFrom(child.getType()) && !filter.isEpochGroupsVisible()) {
-            return true;
-        } else if (Epoch.class.isAssignableFrom(child.getType()) && !filter.isEpochsVisible()) {
-            return true;
-        }
-        return false;
-    }
 }

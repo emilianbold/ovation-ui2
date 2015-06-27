@@ -15,14 +15,8 @@ import us.physion.ovation.ui.interfaces.EventQueueUtilities;
     "Loading_Epochs_Done=Done loading epochs"
 })
 public class EntityChildren extends Children.Keys<EntityWrapper> {
-    protected final TreeFilter filter;
 
     public EntityChildren(List<EntityWrapper> children) {
-        this(children, TreeFilter.NO_FILTER);
-    }
-
-    public EntityChildren(List<EntityWrapper> children, TreeFilter filter) {
-        this.filter = filter;
         updateWithKeys(children == null ? Lists.<EntityWrapper>newArrayList() : children);
     }
 
@@ -30,7 +24,7 @@ public class EntityChildren extends Children.Keys<EntityWrapper> {
     protected Node[] createNodes(final EntityWrapper key) {
         return new Node[]{
             EntityWrapperUtilities.createNode(key,
-            new EntityChildrenChildFactory(key, filter)
+            new EntityChildrenChildFactory(key)
             )};
     }
 

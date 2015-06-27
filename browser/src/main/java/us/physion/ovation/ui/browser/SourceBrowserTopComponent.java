@@ -17,8 +17,6 @@
 package us.physion.ovation.ui.browser;
 
 import java.awt.BorderLayout;
-import java.beans.PropertyChangeEvent;
-import java.util.prefs.Preferences;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import org.netbeans.api.settings.ConvertAsProperties;
@@ -28,10 +26,8 @@ import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.view.BeanTreeView;
 import org.openide.util.NbBundle.Messages;
-import org.openide.util.NbPreferences;
 import org.openide.windows.TopComponent;
 import us.physion.ovation.domain.Source;
-import us.physion.ovation.ui.browser.TreeFilter.NavigatorType;
 import us.physion.ovation.ui.interfaces.EntityColors;
 import us.physion.ovation.ui.interfaces.TreeViewProvider;
 
@@ -60,35 +56,10 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
 
     private final ExplorerManager em = new ExplorerManager();
     private final BeanTreeView view;
-    private final TreeFilter filter;
 
     public SourceBrowserTopComponent() {
-        filter = new TreeFilter(NavigatorType.SOURCE);
-
-        final Preferences prefs = NbPreferences.forModule(SourceBrowserTopComponent.class);
-
-        filter.setExperimentsVisible(prefs.getBoolean("experiments-visible", true));
-        filter.setEpochGroupsVisible(prefs.getBoolean("epoch-groups-visible", true));
-        filter.setEpochsVisible(prefs.getBoolean("epochs-visible", true));
-
-        filter.addPropertyChangeListener((PropertyChangeEvent evt) -> {
-            boolean newValue = (Boolean) evt.getNewValue();
-            
-            if (evt.getPropertyName().equals("experimentsVisible")) {
-                prefs.putBoolean("experiments-visible", newValue);
-            }
-            
-            if (evt.getPropertyName().equals("epochGroupsVisible")) {
-                prefs.putBoolean("epoch-groups-visible", newValue);
-            }
-            
-            if(evt.getPropertyName().equals("epochsVisible")) {
-                prefs.putBoolean("epochs-visible", newValue);
-            }
-        });
-
         setLayout(new BorderLayout());
-        FilteredTreeViewPanel panel = new FilteredTreeViewPanel(filter,
+        FilteredTreeViewPanel panel = new FilteredTreeViewPanel(
                 "us.physion.ovation.ui.browser.insertion.NewSourceAction",
                 Bundle.HINT_SourceBrowser_NewSource_Button());
         view = panel.getTreeView();
@@ -99,10 +70,7 @@ public final class SourceBrowserTopComponent extends TopComponent implements Exp
 
         associateLookup(ExplorerUtils.createLookup(em, getActionMap()));
 
-        BrowserUtilities.initBrowser(em, filter);
-        filter.addPropertyChangeListener((PropertyChangeEvent evt) -> {
-            BrowserUtilities.resetView(em, filter);
-        });
+        BrowserUtilities.initBrowser(em, NavigatorType.SOURCE);
 
         ActionMap actionMap = this.getActionMap();
         actionMap.put("copy-to-clipboard", (Action) new BrowserCopyAction());

@@ -44,8 +44,6 @@ import us.physion.ovation.DataContext;
 import us.physion.ovation.ui.browser.EntityChildren;
 import us.physion.ovation.ui.browser.EntityWrapper;
 import us.physion.ovation.ui.browser.EntityWrapperUtilities;
-import us.physion.ovation.ui.browser.TreeFilter;
-import us.physion.ovation.ui.browser.TreeFilter.NavigatorType;
 import us.physion.ovation.ui.interfaces.ConnectionProvider;
 import us.physion.ovation.ui.interfaces.EventQueueUtilities;
 import us.physion.ovation.ui.interfaces.IEntityWrapper;
@@ -178,13 +176,8 @@ public class SelectResourcesDialog extends javax.swing.JDialog implements Explor
                 List<EntityWrapper> wrappers = EntityWrapperUtilities.wrap(
                         ctx.getProjects());
 
-                TreeFilter filter = new TreeFilter(NavigatorType.PROJECT);
-                filter.setEpochsVisible(true);
-                filter.setExperimentsVisible(true);
-                filter.setEpochGroupsVisible(true);
-
                 getExplorerManager().setRootContext(
-                        new AbstractNode(new EntityChildren(wrappers, filter)));
+                        new AbstractNode(new EntityChildren(wrappers)));
             }
         });
     }

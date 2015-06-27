@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package us.physion.ovation.ui.browser;
 
 import com.google.common.collect.Lists;
@@ -61,11 +57,11 @@ public class QuerySet {
         }
     }
 
-    public void reset(ExplorerManager em, TreeFilter filter) {
+    public void reset(ExplorerManager em, NavigatorType navigatorType) {
         Set<IEntityWrapper> oldResults = results;
         results = Sets.newHashSet();
 
-        em.setRootContext(new EntityNode(new QueryChildren(filter), null));
+        em.setRootContext(new EntityNode(new QueryChildren(navigatorType), null));
         Set<ExplorerManager> mgrs = Sets.newHashSet(em);
         for (IEntityWrapper entity : oldResults) {
             add(entity.getEntity(), mgrs);

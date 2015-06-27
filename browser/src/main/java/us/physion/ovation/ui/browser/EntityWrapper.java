@@ -1,6 +1,5 @@
 package us.physion.ovation.ui.browser;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.google.common.eventbus.Subscribe;
 import java.awt.Color;
@@ -9,7 +8,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import org.joda.time.DateTime;
@@ -34,7 +32,6 @@ public class EntityWrapper implements IEntityWrapper {
 
     private final URI uri;
     private OvationEntity entity = null;
-    private final List<URI> filteredParentURIs = Lists.newArrayList();
     private final Set<URI> watchUris = Sets.newHashSet();
 
     private final Class type;
@@ -124,21 +121,6 @@ public class EntityWrapper implements IEntityWrapper {
     @Override
     public String getURI() {
         return uri.toString();
-    }
-
-    public void addFilteredParentURIs(List<URI> list) {
-        for (URI u : list) {
-            filteredParentURIs.add(u);
-        }
-    }
-
-    public void addFilteredParentURI(URI uri) {
-        filteredParentURIs.add(uri);
-    }
-
-    @Override
-    public List<URI> getFilteredParentURIs() {
-        return filteredParentURIs;
     }
 
     @Override

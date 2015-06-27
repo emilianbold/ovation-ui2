@@ -27,18 +27,21 @@ import us.physion.ovation.DataContext;
     "Reset_Loading_Protocols=Loading Protocols"
 })
 public class EntityRootChildrenChildFactory extends EntityChildrenChildFactory {
+    
+    private final NavigatorType navigatorType;
 
-    public EntityRootChildrenChildFactory(TreeFilter filter) {
-        super(null, filter);
+    public EntityRootChildrenChildFactory(NavigatorType navigatorType) {
+        super(null);
+        this.navigatorType = navigatorType;
     }
 
     @Override
-    protected EntityChildrenWrapperHelper createEntityChildrenWrapperHelper(final TreeFilter filter, BusyCancellable cancel) {
-        return new EntityChildrenWrapperHelper(filter, cancel) {
+    protected EntityChildrenWrapperHelper createEntityChildrenWrapperHelper(BusyCancellable cancel) {
+        return new EntityChildrenWrapperHelper(cancel) {
 
             @Override
             public List<EntityWrapper> createKeysForEntity(List<EntityWrapper> list, DataContext ctx, EntityWrapper ew, ProgressHandle ph) {
-                switch (filter.getNavigatorType()) {
+                switch (navigatorType) {
                     case PROJECT:
                         EntityWrapperUtilities.wrap(list, ctx.getProjects());
                         break;
@@ -56,7 +59,7 @@ public class EntityRootChildrenChildFactory extends EntityChildrenChildFactory {
 
     @Override
     protected String getProgressDisplayName() {
-        switch (filter.getNavigatorType()) {
+        switch (navigatorType) {
             case PROJECT:
                 return Bundle.Reset_Loading_Projects();
             case SOURCE:

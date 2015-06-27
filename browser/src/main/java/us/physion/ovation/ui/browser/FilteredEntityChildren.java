@@ -16,7 +16,7 @@ public class FilteredEntityChildren extends EntityChildren {
     {
         return new Node[]{
             EntityWrapperUtilities.createNewNode(key,
-            new FilteredEntityChildrenChildFactory(key, filter, classesToInclude)
+            new FilteredEntityChildrenChildFactory(key, classesToInclude)
             )};
     }
 }

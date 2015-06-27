@@ -35,7 +35,7 @@ public class BrowserUtilities {
     public final static String SOURCE_BROWSER_ID = "SourceBrowserTopComponent"; //NOI18N
     public final static String PROTOCOL_BROWSER_ID = "ProtocolBrowserTopComponent"; //NOI18N
 
-    protected static Map<ExplorerManager, TreeFilter> registeredViewManagers = new HashMap<ExplorerManager, TreeFilter>();
+    protected static Map<ExplorerManager, NavigatorType> registeredViewManagers = new HashMap<>();
     protected static QueryListener ql;
     protected static ExecutorService executorService = Executors.newFixedThreadPool(2);
     protected static BrowserCopyAction browserCopy = new BrowserCopyAction();
@@ -55,8 +55,8 @@ public class BrowserUtilities {
     }
 
     public static void initBrowser(final ExplorerManager em,
-            final TreeFilter projectView) {
-        registeredViewManagers.put(em, projectView);//TODO: don't need this. we should be able to look up the explorerManagers from TopComponents
+            final NavigatorType navigatorType) {
+        registeredViewManagers.put(em, navigatorType);//TODO: don't need this. we should be able to look up the explorerManagers from TopComponents
         ConnectionProvider cp = Lookup.getDefault().lookup(ConnectionProvider.class);
         cp.addConnectionListener(cn);
 
@@ -89,8 +89,8 @@ public class BrowserUtilities {
             if (ctx == null) {
                 
                 for (ExplorerManager mgr : registeredViewManagers.keySet()) {
-                    TreeFilter filter = registeredViewManagers.get(mgr);
-                    mgr.setRootContext(createRootNode(filter));
+                    NavigatorType navigatorType = registeredViewManagers.get(mgr);
+                    mgr.setRootContext(createRootNode(navigatorType));
                 }
                 
             } else {
@@ -98,8 +98,8 @@ public class BrowserUtilities {
                 
                 if (qs == null) {
                     for (ExplorerManager mgr : registeredViewManagers.keySet()) {
-                        TreeFilter filter = registeredViewManagers.get(mgr);
-                        mgr.setRootContext(createRootNode(filter));
+                        NavigatorType navigatorType = registeredViewManagers.get(mgr);
+                        mgr.setRootContext(createRootNode(navigatorType));
                     }
                 } else {
                     qs.reset();
@@ -144,8 +144,8 @@ public class BrowserUtilities {
                 ctx.getRepository().clear();
 
                 if (qs == null) {
-                    TreeFilter filter = registeredViewManagers.get(explorerManager);
-                    explorerManager.setRootContext(createRootNode(filter));
+                    NavigatorType navigatorType = registeredViewManagers.get(explorerManager);
+                    explorerManager.setRootContext(createRootNode(navigatorType));
                 } else {
                     qs.reset();
                 }
@@ -153,8 +153,8 @@ public class BrowserUtilities {
         }, ph);
     }
 
-    private static EntityNode createRootNode(final TreeFilter filter) {
-        return new EntityRootNode(new EntityRootChildrenChildFactory(filter));
+    private static EntityNode createRootNode(final NavigatorType navigatorType) {
+        return new EntityRootNode(new EntityRootChildrenChildFactory(navigatorType));
     }
 
     public static void switchToSourceView() {
@@ -184,16 +184,6 @@ public class BrowserUtilities {
                 c.toFront();
                 break;
             }
-        }
-    }
-
-    protected static void resetView(final ExplorerManager e, final TreeFilter filter) {
-        final QuerySet qs = Lookup.getDefault().lookup(QueryProvider.class).getQuerySet();
-
-        if (qs == null) {
-            e.setRootContext(createRootNode(filter));
-        } else {
-            qs.reset(e, filter);
         }
     }
 

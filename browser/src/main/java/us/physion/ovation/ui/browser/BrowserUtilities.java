@@ -1,6 +1,5 @@
 package us.physion.ovation.ui.browser;
 
-import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import java.util.*;
 
@@ -108,7 +107,7 @@ public class BrowserUtilities {
         }, ph);
     }
 
-    public static ListenableFuture<Void> reloadView(String topComponendId) {
+    public static void reloadView(String topComponendId) {
         TopComponent tc = WindowManager.getDefault().findTopComponent(topComponendId);
         if (!(tc instanceof ExplorerManager.Provider)) {
             throw new IllegalStateException();
@@ -120,8 +119,6 @@ public class BrowserUtilities {
         if (rootCtx instanceof RefreshableNode) {
             ((RefreshableNode) rootCtx).refresh();
         }
-
-        return Futures.immediateFuture(null);
     }
 
     public static ListenableFuture<Void> resetView(String topComponendId) {

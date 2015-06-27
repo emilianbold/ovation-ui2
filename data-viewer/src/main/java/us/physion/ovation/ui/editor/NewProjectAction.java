@@ -16,9 +16,6 @@
  */
 package us.physion.ovation.ui.editor;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import java.awt.event.ActionEvent;
 import org.joda.time.DateTime;
 import org.openide.awt.ActionID;
@@ -27,7 +24,6 @@ import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionRegistration;
 import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
-import org.slf4j.LoggerFactory;
 import us.physion.ovation.DataContext;
 import us.physion.ovation.domain.Project;
 import us.physion.ovation.ui.browser.BrowserUtilities;
@@ -57,19 +53,7 @@ public final class NewProjectAction extends AbstractNewEntityAction<Project> {
                 "",
                 new DateTime());
 
-        ListenableFuture<Void> reset = BrowserUtilities.reloadView(BrowserUtilities.PROJECT_BROWSER_ID);
-        Futures.addCallback(reset, new FutureCallback<Void>() {
-
-            @Override
-            public void onSuccess(Void result) {
-                selectNode(p, BrowserUtilities.PROJECT_BROWSER_ID);
-            }
-
-            @Override
-            public void onFailure(Throwable t) {
-                LoggerFactory.getLogger(NewProjectAction.class).error("Unable to reset view", t);
-            }
-        });
-        
+        BrowserUtilities.reloadView(BrowserUtilities.PROJECT_BROWSER_ID);
+        selectNode(p, BrowserUtilities.PROJECT_BROWSER_ID);
     }
 }

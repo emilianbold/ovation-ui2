@@ -33,7 +33,6 @@ import us.physion.ovation.domain.EpochContainer;
 import us.physion.ovation.domain.EpochGroup;
 import us.physion.ovation.domain.Experiment;
 import us.physion.ovation.domain.Folder;
-import us.physion.ovation.domain.FolderContainer;
 import us.physion.ovation.domain.Measurement;
 import us.physion.ovation.domain.OvationEntity;
 import us.physion.ovation.domain.Project;
@@ -43,6 +42,7 @@ import us.physion.ovation.domain.Revision;
 import us.physion.ovation.domain.Source;
 import us.physion.ovation.domain.User;
 import us.physion.ovation.domain.mixin.AnalysisAnnotatable;
+import us.physion.ovation.domain.mixin.AttachmentContainer;
 import us.physion.ovation.domain.mixin.ProcedureElement;
 
 public class EntityChildrenWrapperHelper {
@@ -73,9 +73,14 @@ public class EntityChildrenWrapperHelper {
 
         if (ew != null) {
             Class entityClass = ew.getType();
+            
+            //add folders
+            if(AttachmentContainer.class.isAssignableFrom(entityClass)) {
+                addFolders(list, (AttachmentContainer) ew.getEntity(), ph);
+            }
+            
             if (Project.class.isAssignableFrom(entityClass)) {
                 Project entity = (Project) ew.getEntity();
-                addFolders(list, entity, ph);
                 addExperiments(list, entity, ph);
                 addAnalysisRecords(list, entity, ph);
             } else if (Source.class.isAssignableFrom(entityClass)) {
@@ -239,13 +244,13 @@ public class EntityChildrenWrapperHelper {
         }
     }
 
-    private void addFolders(List<EntityWrapper> list, Project entity, ProgressHandle ph) {
+    private void addFolders(List<EntityWrapper> list, AttachmentContainer entity, ProgressHandle ph) {
         if (cancel.isCancelled()) {
             return;
         }
 
         EntityComparator entityComparator = new EntityComparator();
-        List<Folder> folders = Lists.newArrayList(((FolderContainer) entity).getFolders());
+        List<Folder> folders = Lists.newArrayList(entity.getFolders());
 
         int progressCounter = 0;
         if (ph != null) {

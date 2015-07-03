@@ -21,6 +21,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.List;
+import javax.swing.AbstractAction;
+import javax.swing.JPanel;
 import javax.swing.event.TableModelEvent;
 import org.joda.time.DateTime;
 import org.netbeans.api.progress.ProgressHandle;
@@ -142,10 +144,6 @@ public class ExperimentVisualizationPanel extends AbstractContainerVisualization
                 }, ph);
             }
         });
-
-        newEpochGroupHyperlink.addActionListener((ActionEvent e) -> {
-            addEpochGroup();
-        });
     }
 
     private void addEpochGroup() {
@@ -159,6 +157,17 @@ public class ExperimentVisualizationPanel extends AbstractContainerVisualization
         RevealNode.forEntity(BrowserUtilities.PROJECT_BROWSER_ID, group);
     }
 
+    @Override
+    protected JPanel createActionBar() {
+        return createActionBar(this::getExperiment, new AbstractAction(Bundle.NewGroup()) {
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addEpochGroup();
+            }
+        });
+    }
+    
     protected void startDateTimeChanged() {
         getExperiment().setStart(zonedDate(startPicker, startZoneComboBox));
     }
@@ -197,7 +206,8 @@ public class ExperimentVisualizationPanel extends AbstractContainerVisualization
         editHyperlink = new org.jdesktop.swingx.JXHyperlink();
         addProtocolHyperlink = new org.jdesktop.swingx.JXHyperlink();
         fileWell = new us.physion.ovation.ui.editor.FileWell();
-        newEpochGroupHyperlink = new org.jdesktop.swingx.JXHyperlink();
+        jPanel2 = new javax.swing.JPanel();
+        javax.swing.JPanel actionBar = createActionBar();
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -305,7 +315,11 @@ public class ExperimentVisualizationPanel extends AbstractContainerVisualization
                 .addContainerGap())
         );
 
-        org.openide.awt.Mnemonics.setLocalizedText(newEpochGroupHyperlink, org.openide.util.NbBundle.getMessage(ExperimentVisualizationPanel.class, "ExperimentVisualizationPanel.newEpochGroupHyperlink.text")); // NOI18N
+        jPanel2.setBackground(java.awt.Color.white);
+        jPanel2.setLayout(new java.awt.BorderLayout());
+
+        actionBar.setBackground(java.awt.Color.white);
+        jPanel2.add(actionBar, java.awt.BorderLayout.NORTH);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -322,18 +336,16 @@ public class ExperimentVisualizationPanel extends AbstractContainerVisualization
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(startZoneComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(fileWell, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(layout.createSequentialGroup()
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(fileWell, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                            .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                 .addComponent(titleLabel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(puropseField)))
-                        .addContainerGap())
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(newEpochGroupHyperlink, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -351,10 +363,10 @@ public class ExperimentVisualizationPanel extends AbstractContainerVisualization
                 .addGap(18, 18, 18)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(newEpochGroupHyperlink, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(fileWell, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(86, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         bindingGroup.bind();
@@ -369,10 +381,10 @@ public class ExperimentVisualizationPanel extends AbstractContainerVisualization
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
-    private org.jdesktop.swingx.JXHyperlink newEpochGroupHyperlink;
     private javax.swing.JComboBox protocolComboBox;
     private javax.swing.JTable protocolParametersTable;
     private javax.swing.JTextField puropseField;

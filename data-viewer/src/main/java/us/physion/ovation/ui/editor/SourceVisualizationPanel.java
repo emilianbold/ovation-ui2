@@ -27,6 +27,8 @@ import java.awt.event.FocusListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
+import javax.swing.AbstractAction;
+import javax.swing.JPanel;
 import org.openide.util.NbBundle.Messages;
 import us.physion.ovation.domain.Source;
 import us.physion.ovation.ui.browser.BrowserUtilities;
@@ -39,7 +41,8 @@ import us.physion.ovation.ui.reveal.api.RevealNode;
  */
 @Messages({
     "Source_Default_Label=New Source",
-    "Source_Default_Identifier="
+    "Source_Default_Identifier=",
+    "NewChild=+New child"
 })
 public class SourceVisualizationPanel extends AbstractContainerVisualizationPanel {
 
@@ -57,18 +60,6 @@ public class SourceVisualizationPanel extends AbstractContainerVisualizationPane
         initComponents();
 
         setEntityBorder(this);
-
-        addChildButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(final ActionEvent e) {
-                final Source child = getSource().insertSource(Bundle.Source_Default_Label(), Bundle.Source_Default_Identifier());
-
-                getNode().refresh();
-
-                RevealNode.forEntity(BrowserUtilities.SOURCE_BROWSER_ID, child);
-            }
-        });
 
         labelTextField.addActionListener(new ActionListener() {
 
@@ -116,6 +107,26 @@ public class SourceVisualizationPanel extends AbstractContainerVisualizationPane
         });
     }
 
+    @Override
+    protected JPanel createActionBar() {
+        return createActionBar(this::getSource, new AbstractAction(Bundle.NewChild()) {
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                final Source child = getSource().insertSource(Bundle.Source_Default_Label(), Bundle.Source_Default_Identifier());
+
+                getNode().refresh();
+
+                RevealNode.forEntity(BrowserUtilities.SOURCE_BROWSER_ID, child);
+            }
+        });
+    }
+
+    @Override
+    protected String getRevealTopComponentId() {
+        return BrowserUtilities.SOURCE_BROWSER_ID;
+    }
+    
     public Source getSource() {
         return source;
     }
@@ -134,7 +145,8 @@ public class SourceVisualizationPanel extends AbstractContainerVisualizationPane
         labelTextField = new javax.swing.JTextField();
         jLabel1 = new javax.swing.JLabel();
         identifierTextField = new javax.swing.JTextField();
-        addChildButton = new org.jdesktop.swingx.JXHyperlink();
+        bottomPane = new javax.swing.JPanel();
+        actionBar = createActionBar();
 
         setBackground(javax.swing.UIManager.getDefaults().getColor("EditorPane.background"));
 
@@ -154,7 +166,11 @@ public class SourceVisualizationPanel extends AbstractContainerVisualizationPane
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, this, org.jdesktop.beansbinding.ELProperty.create("${source.identifier}"), identifierTextField, org.jdesktop.beansbinding.BeanProperty.create("text_ON_ACTION_OR_FOCUS_LOST"));
         bindingGroup.addBinding(binding);
 
-        org.openide.awt.Mnemonics.setLocalizedText(addChildButton, org.openide.util.NbBundle.getMessage(SourceVisualizationPanel.class, "SourceVisualizationPanel.addChildButton.text")); // NOI18N
+        bottomPane.setBackground(java.awt.Color.white);
+        bottomPane.setLayout(new java.awt.BorderLayout());
+
+        actionBar.setBackground(java.awt.Color.white);
+        bottomPane.add(actionBar, java.awt.BorderLayout.NORTH);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -162,17 +178,17 @@ public class SourceVisualizationPanel extends AbstractContainerVisualizationPane
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGap(17, 17, 17)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(titleLabel)
-                    .addComponent(jLabel1))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(addChildButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(identifierTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 285, Short.MAX_VALUE)
-                    .addComponent(labelTextField))
-                .addContainerGap())
+                    .addComponent(bottomPane, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(titleLabel)
+                            .addComponent(jLabel1))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(identifierTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 285, Short.MAX_VALUE)
+                            .addComponent(labelTextField))
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -186,8 +202,7 @@ public class SourceVisualizationPanel extends AbstractContainerVisualizationPane
                     .addComponent(jLabel1)
                     .addComponent(identifierTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
-                .addComponent(addChildButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(64, Short.MAX_VALUE))
+                .addComponent(bottomPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         bindingGroup.bind();
@@ -195,7 +210,8 @@ public class SourceVisualizationPanel extends AbstractContainerVisualizationPane
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private org.jdesktop.swingx.JXHyperlink addChildButton;
+    private javax.swing.JPanel actionBar;
+    private javax.swing.JPanel bottomPane;
     private javax.swing.JTextField identifierTextField;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JTextField labelTextField;

@@ -19,10 +19,11 @@ package us.physion.ovation.ui.editor;
 
 import com.google.common.collect.Maps;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.util.List;
+import javax.swing.AbstractAction;
+import javax.swing.JPanel;
 import javax.swing.event.TableModelEvent;
 import org.jdesktop.beansbinding.Binding;
 import org.jdesktop.beansbinding.BindingGroup;
@@ -45,7 +46,8 @@ import us.physion.ovation.ui.reveal.api.RevealNode;
  * @author barry
  */
 @Messages({
-    "EpochGroup_Drop_Files_To_Add_Data=Drop files to add data"
+    "EpochGroup_Drop_Files_To_Add_Data=Drop files to add data",
+    "NewGroup=+New Group"
 })
 public final class EpochGroupVisualizationPanel extends AbstractContainerVisualizationPanel {
 
@@ -162,14 +164,6 @@ public final class EpochGroupVisualizationPanel extends AbstractContainerVisuali
                 }, ph);
             }
         });
-        
-        addEpochGroupButton.addActionListener(new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                addEpochGroup();
-            }
-        });
     }
     
     private void addEpochGroup() {
@@ -191,6 +185,17 @@ public final class EpochGroupVisualizationPanel extends AbstractContainerVisuali
         return getNode().getEntity(EpochGroup.class);
     }
 
+    @Override
+    protected JPanel createActionBar() {
+        return createActionBar(this::getEpochGroup, new AbstractAction(Bundle.NewGroup()) {
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                addEpochGroup();
+            }
+        });
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -215,7 +220,8 @@ public final class EpochGroupVisualizationPanel extends AbstractContainerVisuali
         addProtocolHyperlink = new org.jdesktop.swingx.JXHyperlink();
         editHyperlink = new org.jdesktop.swingx.JXHyperlink();
         fileWell = new us.physion.ovation.ui.editor.FileWell();
-        addEpochGroupButton = new org.jdesktop.swingx.JXHyperlink();
+        jPanel2 = new javax.swing.JPanel();
+        actionBar = createActionBar();
 
         setBackground(javax.swing.UIManager.getDefaults().getColor("EditorPane.background"));
 
@@ -277,7 +283,7 @@ public final class EpochGroupVisualizationPanel extends AbstractContainerVisuali
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 418, Short.MAX_VALUE)
+                    .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel2)
                         .addGap(0, 0, Short.MAX_VALUE))
@@ -307,7 +313,11 @@ public final class EpochGroupVisualizationPanel extends AbstractContainerVisuali
                 .addContainerGap())
         );
 
-        org.openide.awt.Mnemonics.setLocalizedText(addEpochGroupButton, org.openide.util.NbBundle.getMessage(EpochGroupVisualizationPanel.class, "EpochGroupVisualizationPanel.addEpochGroupButton.text")); // NOI18N
+        jPanel2.setBackground(java.awt.Color.white);
+        jPanel2.setLayout(new java.awt.BorderLayout());
+
+        actionBar.setBackground(java.awt.Color.white);
+        jPanel2.add(actionBar, java.awt.BorderLayout.NORTH);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -320,23 +330,21 @@ public final class EpochGroupVisualizationPanel extends AbstractContainerVisuali
                         .addGap(6, 6, 6)
                         .addComponent(dateLabel)
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(startPicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(startZoneComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(fileWell, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                                 .addComponent(titleLabel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(labelTextField)))
-                        .addContainerGap())
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(startPicker, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(startZoneComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(addEpochGroupButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(fileWell, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                                .addComponent(labelTextField))
+                            .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -354,10 +362,10 @@ public final class EpochGroupVisualizationPanel extends AbstractContainerVisuali
                 .addGap(18, 18, 18)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(addEpochGroupButton, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(fileWell, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addGap(23, 23, 23))
         );
 
         bindingGroup.bind();
@@ -365,7 +373,7 @@ public final class EpochGroupVisualizationPanel extends AbstractContainerVisuali
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private org.jdesktop.swingx.JXHyperlink addEpochGroupButton;
+    private javax.swing.JPanel actionBar;
     private org.jdesktop.swingx.JXHyperlink addProtocolHyperlink;
     private javax.swing.JLabel dateLabel;
     private org.jdesktop.swingx.JXHyperlink editHyperlink;
@@ -373,6 +381,7 @@ public final class EpochGroupVisualizationPanel extends AbstractContainerVisuali
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTextField labelTextField;
     private javax.swing.JComboBox protocolComboBox;

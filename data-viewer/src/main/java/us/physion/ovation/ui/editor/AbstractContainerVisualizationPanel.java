@@ -17,6 +17,8 @@
 
 package us.physion.ovation.ui.editor;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -24,22 +26,36 @@ import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
+import java.util.function.Supplier;
+import javax.swing.Action;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComponent;
 import javax.swing.JList;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.LineBorder;
+import org.jdesktop.swingx.JXHyperlink;
+import org.openide.util.NbBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import us.physion.ovation.DataContext;
+import us.physion.ovation.domain.Folder;
+import us.physion.ovation.domain.FolderContainer;
 import us.physion.ovation.domain.Protocol;
+import us.physion.ovation.ui.browser.BrowserUtilities;
 import us.physion.ovation.ui.interfaces.EntityColors;
 import us.physion.ovation.ui.interfaces.IEntityNode;
+import us.physion.ovation.ui.reveal.api.RevealNode;
 
 /**
  *
  * @author barry
  */
+@NbBundle.Messages({
+    "NewFolderHyperlink.text=+New Folder"
+})
 abstract class AbstractContainerVisualizationPanel extends javax.swing.JLayeredPane {
 
     public static final String PROP_PROTOCOLS = "protocols";
@@ -64,7 +80,15 @@ abstract class AbstractContainerVisualizationPanel extends javax.swing.JLayeredP
 
     public List<Protocol> getProtocols() {
         List<Protocol> result = Lists.newLinkedList(context.getProtocols());
-
+        result = Lists.newLinkedList(Iterables.filter(result, p -> {
+            try {
+                p.getName();
+                return false;
+            } catch (NullPointerException npe) {
+                return true;
+            }
+        }));
+        
         return result;
     }
 
@@ -83,22 +107,69 @@ abstract class AbstractContainerVisualizationPanel extends javax.swing.JLayeredP
         firePropertyChange("protocols", current, getProtocols());
         return p;
     }
+    
+    protected Folder addFolder(FolderContainer parent, boolean reveal) {
+        final Folder folder = parent.addFolder(Bundle.Default_Folder_Label());
+        if (reveal) {
+            node.refresh();
+            RevealNode.forEntity(getRevealTopComponentId(), folder);
+        }
+        return folder;
+    }
+    
+    protected String getRevealTopComponentId() {
+        return BrowserUtilities.PROJECT_BROWSER_ID;
+    }
+    
+    protected JPanel createActionBar(Supplier<FolderContainer> folderContainer, Action... actions) {
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
+        if (folderContainer != null) {
+            JXHyperlink newFolderHyperlink = new org.jdesktop.swingx.JXHyperlink();
+            org.openide.awt.Mnemonics.setLocalizedText(newFolderHyperlink, Bundle.NewFolderHyperlink_text());
+            p.add(newFolderHyperlink);
+            p.add(Box.createHorizontalStrut(10));
+
+            newFolderHyperlink.addActionListener(e -> addFolder(folderContainer.get(), true));
+        }
+        for(Action action : actions) {
+            JXHyperlink link = new JXHyperlink(action);
+            p.add(link);
+            p.add(Box.createHorizontalStrut(10));
+        }
+        return p;
+    }
+    
+    protected JPanel createActionBar() {
+        return createActionBar(null);
+    }
 
     static class ProtocolCellRenderer extends DefaultListCellRenderer {
 
         @Override
         public Component getListCellRendererComponent(JList list,
-                Object value,
+                final Object value,
                 int index,
                 boolean isSelected,
                 boolean cellHasFocus) {
 
-            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-            if (value instanceof Protocol) {
-                Protocol p = (Protocol) value;
-                setText(p.getName()); //TODO getVersion()
-            }
-            return this;
+            return super.getListCellRendererComponent(list, new Object() {
+
+                @Override
+                public String toString() {
+                    if (value instanceof Protocol) {
+                        Protocol p = (Protocol) value;
+                        try {
+                            return p.getName(); //TODO getVersion()
+                        } catch (NullPointerException npe) {
+                            new Exception("NPE on protocol " + p.getUuid()).printStackTrace(System.out);
+                            return "NPE " + p.getUuid();
+                        }
+                    }
+                    return value.toString();
+                }
+
+            }, index, isSelected, cellHasFocus);
         }
     }
 

@@ -97,7 +97,7 @@ public class ProjectVisualizationPanel extends AbstractContainerVisualizationPan
         });
 
         newFolderHyperlink.addActionListener((final ActionEvent e) -> {
-            addFolder(true);
+            addFolder(getProject(), true);
         });
 
         dataFileWell.setDelegate(new FileWell.AbstractDelegate(Bundle.Project_Drop_Files()) {
@@ -109,7 +109,7 @@ public class ProjectVisualizationPanel extends AbstractContainerVisualizationPan
                 final boolean rootFolder = (files.length == 1 && files[0].isDirectory());
                 final Folder root = rootFolder
                         ? getProject().addFolder(files[0].getName())
-                        : addFolder(false);
+                        : addFolder(getProject(), false);
 
                 ListenableFuture<OvationEntity> addResources = EventQueueUtilities.runOffEDT(() -> {
                     return EntityUtilities.insertResources(root,
@@ -236,16 +236,6 @@ public class ProjectVisualizationPanel extends AbstractContainerVisualizationPan
         return exp;
     }
 
-    private Folder addFolder(boolean reveal) {
-        final Folder folder = getProject().addFolder(Bundle.Default_Folder_Label());
-        if (reveal) {
-            node.refresh();
-            RevealNode.forEntity(BrowserUtilities.PROJECT_BROWSER_ID, folder);
-        }
-
-        return folder;
-    }
-
     protected void startDateTimeChanged() {
         getProject().setStart(zonedDate(startPicker, startZoneComboBox));
     }
@@ -254,6 +244,11 @@ public class ProjectVisualizationPanel extends AbstractContainerVisualizationPan
         return getNode().getEntity(Project.class);
     }
 
+    @Override
+    protected String getRevealTopComponentId() {
+        return BrowserUtilities.PROJECT_BROWSER_ID;
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

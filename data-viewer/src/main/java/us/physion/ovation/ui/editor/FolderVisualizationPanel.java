@@ -68,7 +68,7 @@ public class FolderVisualizationPanel extends AbstractContainerVisualizationPane
 
     private void initUI() {
         newFolderLink.addActionListener((ActionEvent e) -> {
-            addFolder(true);
+            addFolder(getFolder(), true);
         });
 
         fileWell.setDelegate(new FileWell.AbstractDelegate(Bundle.Folder_Drop_Files_To_Add_Resources()) {
@@ -187,20 +187,15 @@ public class FolderVisualizationPanel extends AbstractContainerVisualizationPane
 
     }
 
-    private Folder addFolder(boolean reveal) {
-        final Folder folder = getFolder().addFolder(Bundle.Default_Folder_Label());
-        if (reveal) {
-            node.refresh();
-            RevealNode.forEntity(BrowserUtilities.PROJECT_BROWSER_ID, folder);
-        }
-
-        return folder;
-    }
-
     public Folder getFolder() {
         return getNode().getEntity(Folder.class);
     }
 
+    @Override
+    protected String getRevealTopComponentId() {
+        return BrowserUtilities.PROJECT_BROWSER_ID;
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

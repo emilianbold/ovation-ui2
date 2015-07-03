@@ -1,10 +1,5 @@
-package us.physion.ovation.ui.editor;
-
-import us.physion.ovation.domain.Protocol;
-import us.physion.ovation.ui.interfaces.IEntityNode;
-
 /*
- * Copyright (C) 2014 Physion LLC
+ * Copyright (C) 2014-2015 Physion LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,11 +14,12 @@ import us.physion.ovation.ui.interfaces.IEntityNode;
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+package us.physion.ovation.ui.editor;
 
-/**
- *
- * @author barry
- */
+import javax.swing.JPanel;
+import us.physion.ovation.domain.Protocol;
+import us.physion.ovation.ui.interfaces.IEntityNode;
+
 public class ProtocolVisualizationPanel extends AbstractContainerVisualizationPanel {
 
     final Protocol protocol;
@@ -45,6 +41,11 @@ public class ProtocolVisualizationPanel extends AbstractContainerVisualizationPa
         return protocol;
     }
 
+    @Override
+    protected JPanel createActionBar() {
+        return createActionBar(this::getProtocol);
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -66,6 +67,8 @@ public class ProtocolVisualizationPanel extends AbstractContainerVisualizationPa
         functionField = new javax.swing.JTextField();
         urlField = new javax.swing.JTextField();
         revisionField = new javax.swing.JTextField();
+        jPanel1 = new javax.swing.JPanel();
+        actionBar = createActionBar();
 
         setBackground(javax.swing.UIManager.getDefaults().getColor("EditorPane.background"));
 
@@ -143,6 +146,24 @@ public class ProtocolVisualizationPanel extends AbstractContainerVisualizationPa
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
+        jPanel1.setBackground(java.awt.Color.white);
+        jPanel1.setLayout(new java.awt.BorderLayout());
+
+        actionBar.setBackground(java.awt.Color.white);
+
+        javax.swing.GroupLayout actionBarLayout = new javax.swing.GroupLayout(actionBar);
+        actionBar.setLayout(actionBarLayout);
+        actionBarLayout.setHorizontalGroup(
+            actionBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 388, Short.MAX_VALUE)
+        );
+        actionBarLayout.setVerticalGroup(
+            actionBarLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 13, Short.MAX_VALUE)
+        );
+
+        jPanel1.add(actionBar, java.awt.BorderLayout.CENTER);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -150,6 +171,7 @@ public class ProtocolVisualizationPanel extends AbstractContainerVisualizationPa
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(codePanel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(documentScrollPane, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 388, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
@@ -166,9 +188,11 @@ public class ProtocolVisualizationPanel extends AbstractContainerVisualizationPa
                     .addComponent(titleLabel)
                     .addComponent(nameField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(documentScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE)
+                .addComponent(documentScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, 161, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(codePanel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -177,11 +201,13 @@ public class ProtocolVisualizationPanel extends AbstractContainerVisualizationPa
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JPanel actionBar;
     private javax.swing.JPanel codePanel;
     private javax.swing.JTextArea docTextArea;
     private javax.swing.JScrollPane documentScrollPane;
     private javax.swing.JTextField functionField;
     private javax.swing.JLabel functionLabel;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField nameField;
     private javax.swing.JTextField revisionField;
     private javax.swing.JLabel scmRevisionLabel;
